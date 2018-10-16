@@ -5,7 +5,6 @@ from typing import List, Union
 from datetime import datetime, timedelta
 from DiscordHooks import Hook, Embed, EmbedThumbnail, EmbedFooter
 
-
 DEFAULT_ICON = 'https://pbs.twimg.com/profile_images/2189766987/ctftime-logo-avatar_400x400.png'
 TIME_FORMAT = '%Y-%m-%dT%H%M%S%z'
 BASE_URL = 'https://ctftime.org'
@@ -94,10 +93,11 @@ def build_message(max_ctfs: int, days: int, cache_path: str) -> Union[Hook, None
     if cache == ids:
         return None
     else:
-        with open(cache_path, 'w') as f:
-            f.write(ids)
+        if cache_path:
+            with open(cache_path, 'w') as f:
+                f.write(ids)
         return Hook(username='CTFTime', content=f'CTFs during the upcoming {days} days:', embeds=embeds,
-                avatar_url=DEFAULT_ICON)
+                    avatar_url=DEFAULT_ICON)
 
 
 def send_updates(webhooks: List[str], max_ctfs: int, days: int, cache_path: str):
