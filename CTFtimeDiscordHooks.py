@@ -41,9 +41,13 @@ class CTF:
         else:
             self.location = 'online'
         self.start = CTF.parse_time(json_obj.get('start', '1970-01-01T00:00:00+00:00'))
+
         self.description = json_obj.get('description')
         if self.description is None or self.description == '':
             self.description = 'No description :shrug:'
+        elif len(self.description) > 2048:
+            self.description = self.description[:2044] + '...'
+
         self.restrictions = json_obj.get('restrictions')
         if self.restrictions is None or self.restrictions == '':
             self.restrictions = 'Unknown'
