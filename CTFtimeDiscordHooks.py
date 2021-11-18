@@ -1,9 +1,11 @@
 import argparse
 import requests
+import datetime
 
 from typing import List, Union
 from datetime import datetime, timedelta
 from DiscordHooks import Hook, Embed, EmbedThumbnail, EmbedFooter
+from numpy import datetime64
 
 DEFAULT_ICON = 'https://pbs.twimg.com/profile_images/2189766987/ctftime-logo-avatar_400x400.png'
 TIME_FORMAT = '%Y-%m-%dT%H%M%S%z'
@@ -21,6 +23,8 @@ class CTF:
     description: str
     restrictions: str
     duration: timedelta
+    fields: list
+    dayOfWeek: str
 
     def __init__(self, json_obj: dict):
         self.cid = json_obj.get('id', 0)
@@ -52,13 +56,31 @@ class CTF:
         if self.restrictions is None or self.restrictions == '':
             self.restrictions = 'Unknown'
         self.duration = timedelta(**json_obj.get('duration', dict()))
+        
+        self.fields = [
+            {
+                "name": "Weight",
+                "value": json_obj.get('weight', 0.0),
+                "inline": True
+            },
+            {
+                "name": "Interested teams",
+                "value": json_obj.get('weight', 0),
+                "inline": True
+            }
+        ]
+
+        self.dayOfWeek = CTF.parse_dayOfWeek(self.start)
 
     def generate_embed(self):
-        return Embed(title=self.name, color=0xFF0035, url=self.url, description=self.description,
-                     timestamp=self.start, thumbnail=EmbedThumbnail(url=self.logo),
-                     footer=EmbedFooter(text=f' ⏳ {self.duration} | 📌 {self.location} |'
-                                             f' ⛳ {self.format} | 👮 {self.restrictions}')
-                     )
+        return Embed(
+                        title=self.name, color=0xFF0035, url=self.url, description=self.description,
+                        timestamp=self.start, thumbnail=EmbedThumbnail(url=self.logo), fields=self.fields,
+                        footer=EmbedFooter(text=f' ⏳ {self.duration} | 📌 {self.location} |'
+                                             f' ⛳ {self.format} | 👮 {self.restrictions} | '
+                                             f' 🔜 {self.dayOfWeek} | '
+                                          )
+                    )
 
     @staticmethod
     def parse_logo_url(url: str) -> str:
@@ -75,6 +97,12 @@ class CTF:
             time = '1970-01-01T00:00:00+00:00'
         return datetime.strptime(time.replace(':', ''), TIME_FORMAT)
 
+    @staticmethod
+    def parse_dayOfWeek(time: datetime) -> str:
+        if time is None or time == '':
+            time = 'Tui khong biet ngay nao'
+        converted = datetime64(time).astype(datetime).date()
+        return  converted.strftime("%A, %B %C, ") + str(converted.year)
 
 def get_ctfs(max_ctfs: int, days: int) -> List[CTF]:
     start = datetime.now()
@@ -100,8 +128,7 @@ def build_message(max_ctfs: int, days: int, cache_path: str) -> Union[Hook, None
         if cache_path:
             with open(cache_path, 'w') as f:
                 f.write(ids)
-        return Hook(username='CTFTime', content=f'CTFs during the upcoming {days} days:', embeds=embeds,
-                    avatar_url=DEFAULT_ICON)
+        return Hook(username='CTFTime', content=f'There are {len(embeds)} CTFs during the upcoming {days} days, I hope you guys enjoy those (✿◡‿◡) B1T5crew 🔥', embeds=embeds, avatar_url=DEFAULT_ICON)
 
 
 def send_updates(webhooks: List[str], max_ctfs: int, days: int, cache_path: str):
