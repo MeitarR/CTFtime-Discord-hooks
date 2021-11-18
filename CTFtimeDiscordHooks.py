@@ -4,7 +4,7 @@ import datetime
 
 from typing import List, Union
 from datetime import datetime, timedelta
-from DiscordHooks import Hook, Embed, EmbedThumbnail, EmbedFooter
+from DiscordHooks import Hook, Embed, EmbedThumbnail, EmbedFooter, EmbedField
 from numpy import datetime64
 
 DEFAULT_ICON = 'https://pbs.twimg.com/profile_images/2189766987/ctftime-logo-avatar_400x400.png'
@@ -23,7 +23,7 @@ class CTF:
     description: str
     restrictions: str
     duration: timedelta
-    fields: list
+    fields: dict
     dayOfWeek: str
 
     def __init__(self, json_obj: dict):
@@ -57,17 +57,14 @@ class CTF:
             self.restrictions = 'Unknown'
         self.duration = timedelta(**json_obj.get('duration', dict()))
         
-        self.fields = [
-            {
-                "name": "Weight",
-                "value": json_obj.get('weight', 0.0)
-            },
-            {
-                "name": "Interested teams",
-                "value": json_obj.get('weight', 0)
-            }
-        ]
-
+        self.fields = [{
+            "name": "Weight",
+            "value": str(json_obj.get('weight', 0.0))
+        },{
+            "name": "Interested teams",
+            "value": str(json_obj.get('participants', 0))
+        }]
+        
         self.dayOfWeek = CTF.parse_dayOfWeek(self.start)
 
     def generate_embed(self):
