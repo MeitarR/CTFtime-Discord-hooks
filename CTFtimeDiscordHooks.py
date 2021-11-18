@@ -60,13 +60,11 @@ class CTF:
         self.fields = [
             {
                 "name": "Weight",
-                "value": json_obj.get('weight', 0.0),
-                "inline": True
+                "value": json_obj.get('weight', 0.0)
             },
             {
                 "name": "Interested teams",
-                "value": json_obj.get('weight', 0),
-                "inline": True
+                "value": json_obj.get('weight', 0)
             }
         ]
 
