@@ -98,9 +98,10 @@ class CTF:
     def parse_dayOfWeek(finish: datetime, ndaysBefore: datetime) -> str:
         if finish is None or finish == '' or ndaysBefore is None or ndaysBefore == '':
             return 'Tui khong biet ngay nao'
-            
+
+        finish += timedelta(hours=7)
         startDays =  finish - ndaysBefore
-        converted = datetime64(startDays).astype(datetime).date()
+        converted = datetime64(startDays).astype(datetime)
         return  converted.strftime("%I:%M %p %A, %B %C, ") + str(converted.year)
 
 def get_ctfs(max_ctfs: int, days: int) -> List[CTF]:
