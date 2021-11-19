@@ -20,6 +20,7 @@ class CTF:
     format: str
     location: str
     start: datetime
+    finish: datetime
     description: str
     restrictions: str
     duration: timedelta
@@ -45,6 +46,7 @@ class CTF:
         else:
             self.location = 'online'
         self.start = CTF.parse_time(json_obj.get('start', '1970-01-01T00:00:00+00:00'))
+        self.finish = CTF.parse_time(json_obj.get('finish', '1970-01-01T00:00:00+00:00'))
 
         self.description = json_obj.get('description')
         if self.description is None or self.description == '':
@@ -65,7 +67,7 @@ class CTF:
             "value": str(json_obj.get('participants', 0))
         }]
         
-        self.dayOfWeek = CTF.parse_dayOfWeek(self.start)
+        self.dayOfWeek = CTF.parse_dayOfWeek(self.finish, self.duration)
 
     def generate_embed(self):
         return Embed(
@@ -73,7 +75,7 @@ class CTF:
                         timestamp=self.start, thumbnail=EmbedThumbnail(url=self.logo), fields=self.fields,
                         footer=EmbedFooter(text=f' ⏳ {self.duration} | 📌 {self.location} |'
                                              f' ⛳ {self.format} | 👮 {self.restrictions} | '
-                                             f' 🔜 {self.dayOfWeek} | '
+                                             f' 🔜 {self.dayOfWeek} '
                                           )
                     )
 
@@ -93,11 +95,13 @@ class CTF:
         return datetime.strptime(time.replace(':', ''), TIME_FORMAT)
 
     @staticmethod
-    def parse_dayOfWeek(time: datetime) -> str:
-        if time is None or time == '':
-            time = 'Tui khong biet ngay nao'
-        converted = datetime64(time).astype(datetime).date()
-        return  converted.strftime("%A, %B %C, ") + str(converted.year)
+    def parse_dayOfWeek(finish: datetime, ndaysBefore: datetime) -> str:
+        if finish is None or finish == '' or ndaysBefore is None or ndaysBefore == '':
+            return 'Tui khong biet ngay nao'
+            
+        startDays =  finish - ndaysBefore
+        converted = datetime64(startDays).astype(datetime).date()
+        return  converted.strftime("%I:%M %p %A, %B %C, ") + str(converted.year)
 
 def get_ctfs(max_ctfs: int, days: int) -> List[CTF]:
     start = datetime.now()
@@ -123,7 +127,7 @@ def build_message(max_ctfs: int, days: int, cache_path: str) -> Union[Hook, None
         if cache_path:
             with open(cache_path, 'w') as f:
                 f.write(ids)
-        return Hook(username='CTFTime', content=f'There are {len(embeds)} CTFs during the upcoming {days} days, I hope you guys enjoy those (✿◡‿◡) B1T5crew 🔥', embeds=embeds, avatar_url=DEFAULT_ICON)
+        return Hook(username='CTFtime', content=f'There are {len(embeds)} CTFs during the upcoming {days} days, I hope you guys enjoy those (✿◡‿◡) B1T5crew 🔥', embeds=embeds, avatar_url=DEFAULT_ICON)
 
 
 def send_updates(webhooks: List[str], max_ctfs: int, days: int, cache_path: str):
