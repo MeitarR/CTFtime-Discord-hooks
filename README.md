@@ -1,2 +1,3 @@
 # CTFtime-Discord-hooks
-![example](https://raw.githubusercontent.com/greybtw/CTFtime-Discord-hooks/master/cttime-discord-hook.png)
+![example](https://user-images.githubusercontent.com/50090727/142731112-4c336221-745b-414b-9c30-5719994c9c4d.png)
+
