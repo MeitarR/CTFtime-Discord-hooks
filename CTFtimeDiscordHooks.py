@@ -97,8 +97,9 @@ class CTF:
     @staticmethod
     def parse_dayOfWeek(finish: datetime, ndaysBefore: datetime) -> str:
         if finish is None or finish == '' or ndaysBefore is None or ndaysBefore == '':
-            return 'Tui khong biet ngay nao'
-
+            return "I don't know O_O"
+        
+        # My timezone is UTC+7
         finish += timedelta(hours=7)
         startDays =  finish - ndaysBefore
         converted = datetime64(startDays).astype(datetime)
