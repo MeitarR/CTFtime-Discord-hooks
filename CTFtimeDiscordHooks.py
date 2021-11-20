@@ -20,12 +20,10 @@ class CTF:
     format: str
     location: str
     start: datetime
-    finish: datetime
     description: str
     restrictions: str
     duration: timedelta
     fields: dict
-    dayOfWeek: str
 
     def __init__(self, json_obj: dict):
         self.cid = json_obj.get('id', 0)
@@ -66,8 +64,6 @@ class CTF:
             "name": "Interested teams",
             "value": str(json_obj.get('participants', 0))
         }]
-        
-        self.dayOfWeek = CTF.parse_dayOfWeek(self.finish, self.duration)
 
     def generate_embed(self):
         return Embed(
@@ -75,7 +71,6 @@ class CTF:
                         timestamp=self.start, thumbnail=EmbedThumbnail(url=self.logo), fields=self.fields,
                         footer=EmbedFooter(text=f' ⏳ {self.duration} | 📌 {self.location} |'
                                              f' ⛳ {self.format} | 👮 {self.restrictions} | '
-                                             f' 🔜 {self.dayOfWeek} '
                                           )
                     )
 
@@ -93,17 +88,6 @@ class CTF:
         if time is None or time == '':
             time = '1970-01-01T00:00:00+00:00'
         return datetime.strptime(time.replace(':', ''), TIME_FORMAT)
-
-    @staticmethod
-    def parse_dayOfWeek(finish: datetime, ndaysBefore: datetime) -> str:
-        if finish is None or finish == '' or ndaysBefore is None or ndaysBefore == '':
-            return "I don't know O_O"
-        
-        # My timezone is UTC+7
-        finish += timedelta(hours=7)
-        startDays =  finish - ndaysBefore
-        converted = datetime64(startDays).astype(datetime)
-        return  converted.strftime("%I:%M %p %A, %B %C, ") + str(converted.year)
 
 def get_ctfs(max_ctfs: int, days: int) -> List[CTF]:
     start = datetime.now()
@@ -129,7 +113,7 @@ def build_message(max_ctfs: int, days: int, cache_path: str) -> Union[Hook, None
         if cache_path:
             with open(cache_path, 'w') as f:
                 f.write(ids)
-        return Hook(username='CTFtime', content=f'There are {len(embeds)} CTFs during the upcoming {days} days, I hope you guys enjoy those (✿◡‿◡) B1T5crew 🔥', embeds=embeds, avatar_url=DEFAULT_ICON)
+        return Hook(username='CTFtime', content=f'There are {len(embeds)} CTFs during the upcoming {days} days', embeds=embeds, avatar_url=DEFAULT_ICON)
 
 
 def send_updates(webhooks: List[str], max_ctfs: int, days: int, cache_path: str):
