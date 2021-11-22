@@ -1,11 +1,9 @@
 import argparse
 import requests
-import datetime
 
 from typing import List, Union
 from datetime import datetime, timedelta
-from DiscordHooks import Hook, Embed, EmbedThumbnail, EmbedFooter, EmbedField
-from numpy import datetime64
+from DiscordHooks import Hook, Embed, EmbedThumbnail, EmbedFooter
 
 DEFAULT_ICON = 'https://pbs.twimg.com/profile_images/2189766987/ctftime-logo-avatar_400x400.png'
 TIME_FORMAT = '%Y-%m-%dT%H%M%S%z'
@@ -44,8 +42,6 @@ class CTF:
         else:
             self.location = 'online'
         self.start = CTF.parse_time(json_obj.get('start', '1970-01-01T00:00:00+00:00'))
-        self.finish = CTF.parse_time(json_obj.get('finish', '1970-01-01T00:00:00+00:00'))
-
         self.description = json_obj.get('description')
         if self.description is None or self.description == '':
             self.description = 'No description :shrug:'
@@ -70,8 +66,7 @@ class CTF:
                         title=self.name, color=0xFF0035, url=self.url, description=self.description,
                         timestamp=self.start, thumbnail=EmbedThumbnail(url=self.logo), fields=self.fields,
                         footer=EmbedFooter(text=f' ⏳ {self.duration} | 📌 {self.location} |'
-                                             f' ⛳ {self.format} | 👮 {self.restrictions} | '
-                                          )
+                                             f' ⛳ {self.format} | 👮 {self.restrictions} | ')
                     )
 
     @staticmethod
