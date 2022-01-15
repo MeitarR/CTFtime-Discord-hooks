@@ -1,4 +1,5 @@
 import argparse
+from types import NoneType
 import requests
 import datetime
 
@@ -102,7 +103,8 @@ class CTF:
         finish += timedelta(hours=7)
         startDays =  finish - ndaysBefore
         converted = datetime64(startDays).astype(datetime)
-        return  converted.strftime("%I:%M %p %A, %B %C, ") + str(converted.year)
+        start_day_fix =  (str(startDays).split(" ")[0].split('-')[2])
+        return (converted.strftime(f"%I:%M %p %A, %B {start_day_fix}, ") + str(converted.year))
 
 def get_ctfs(max_ctfs: int, days: int) -> List[CTF]:
     start = datetime.now()
@@ -128,7 +130,10 @@ def build_message(max_ctfs: int, days: int, cache_path: str) -> Union[Hook, None
         if cache_path:
             with open(cache_path, 'w') as f:
                 f.write(ids)
-        return Hook(username='CTFtime', content=f'There are {len(embeds)} CTFs during the upcoming {days} days, I hope you guys enjoy those (✿◡‿◡) B1T5crew 🔥', embeds=embeds, avatar_url=DEFAULT_ICON)
+        if len(embeds) >= 1:
+            return Hook(username='CTFtime', content=f'There are {len(embeds)} CTFs during the upcoming {days} days, I hope you guys enjoy those (✿◡‿◡) B1T5crew 🔥', embeds=embeds, avatar_url=DEFAULT_ICON)
+        else:   
+            return None
 
 
 def send_updates(webhooks: List[str], max_ctfs: int, days: int, cache_path: str):
