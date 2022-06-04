@@ -1,8 +1,8 @@
 import os
-import requests
-
+from time import timezone
 from typing import List, Union
 from datetime import datetime, timedelta
+import requests
 from DiscordHooks import Hook, Embed, EmbedThumbnail, EmbedFooter
 
 DEFAULT_ICON = (
@@ -10,7 +10,6 @@ DEFAULT_ICON = (
 )
 TIME_FORMAT = "%Y-%m-%dT%H%M%S%z"
 BASE_URL = "https://ctftime.org"
-
 
 class CTF:
     cid: int
@@ -98,39 +97,24 @@ def get_ctfs(max_ctfs: int, days: int) -> List[CTF]:
     ]
 
 
-def build_message(max_ctfs: int, days: int, cache_path: str) -> Union[Hook, None]:
-    cache = ""
-    if cache_path:
-        with open(cache_path) as f:
-            cache = f.read().strip()
-
+def build_message(max_ctfs: int, days: int) -> Union[Hook, None]:
     ctfs = get_ctfs(max_ctfs, days)
     embeds = [ctf.generate_embed() for ctf in ctfs]
-    ids = ",".join([str(ctf.cid) for ctf in ctfs])
-    if cache == ids:
-        return None
-    else:
-        if cache_path:
-            with open(cache_path, "w") as f:
-                f.write(ids)
-        return Hook(
-            username="CTFTime",
-            content=f"CTFs during the upcoming {days} days:",
-            embeds=embeds,
-            avatar_url=DEFAULT_ICON,
-        )
+    return Hook(
+        username="CTFTime",
+        content=f"CTFs during the upcoming {days} days:",
+        embeds=embeds,
+        avatar_url=DEFAULT_ICON,
+    )
 
-
-def send_updates(webhooks: List[str], max_ctfs: int, days: int, cache_path: str):
-    message = build_message(max_ctfs=max_ctfs, days=days, cache_path=cache_path)
+def send_updates(webhooks: List[str], max_ctfs: int, days: int):
+    message = build_message(max_ctfs=max_ctfs, days=days)
     if message is not None:
         for webhook in webhooks:
             message.execute(hook_url=webhook)
 
-
-def lambda_handler(event, context):
-    webhook = os.environ.get("DISCORD_WEBHOOK")
-    max_ctfs = os.environ.get("MAX_CTFS")
-    days = os.environ.get("DAYS")
-    cache_file = os.environ.get("CACHE_FILE")
-    send_updates(webhook, max_ctfs, days, cache_file)
+def handler(event=None, context=None):
+    webhook = os.getenv("DISCORD_WEBHOOK")
+    max_ctfs = int(os.getenv("MAX_CTFS"))
+    days = int(os.getenv("DAYS"))
+    send_updates([webhook], max_ctfs, days)

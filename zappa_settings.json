@@ -1,0 +1,26 @@
+{
+    "prod": {
+        "app_function": "hook.handler",
+        "aws_region": "us-east-2",
+        "profile_name": "default",
+        "project_name": "polyhx-ctftimeh",
+        "runtime": "python3.9",
+        "s3_bucket": "zappa-ea3crt88t",
+        "events": [{
+            "function": "hook.handler",
+            "expression": "rate(7 days)"
+        }]
+    },
+    "dev": {
+        "app_function": "hook.handler",
+        "aws_region": "us-east-2",
+        "profile_name": "default",
+        "project_name": "polyhx-ctftimeh",
+        "runtime": "python3.9",
+        "s3_bucket": "zappa-ea3crt88t",
+        "events": [{
+            "function": "hook.handler",
+            "expression": "rate(1 minute)"
+        }]
+    }
+}
